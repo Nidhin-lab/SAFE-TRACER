@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Safe Tracer by NIDHIN R - AI-Powered Investigation Platform</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    #investigation-scanner {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(57, 255, 20, 0.1) 0%, rgba(0, 17, 34, 0.9) 70%);
+      border: 3px solid #39ff14;
+      box-shadow: 0 0 60px rgba(57, 255, 20, 0.5), inset 0 0 60px rgba(57, 255, 20, 0.15);
+      z-index: -1;
+      overflow: hidden;
+      animation: scannerPulse 8s ease-in-out infinite;
+    }
+
+    @keyframes scannerPulse {
+      0%, 100% { 
+        box-shadow: 0 0 60px rgba(57, 255, 20, 0.5), inset 0 0 60px rgba(57, 255, 20, 0.15);
+        transform: translate(-50%, -50%) scale(1);
+      }
+      50% { 
+        box-shadow: 0 0 100px rgba(57, 255, 20, 0.7), inset 0 0 100px rgba(57, 255, 20, 0.25);
+        transform: translate(-50%, -50%) scale(1.05);
+      }
+    }
+
+    .radar-sweep {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 4px;
+      height: 180px;
+      background: linear-gradient(to top, transparent, #39ff14, rgba(57, 255, 20, 0.4));
+      transform-origin: bottom center;
+      transform: translate(-50%, -100%) rotate(0deg);
+      animation: radarSweep 5s linear infinite;
+      box-shadow: 0 0 25px #39ff14, 0 0 50px rgba(57, 255, 20, 0.6);
+    }
+
+    @keyframes radarSweep {
+      0% { transform: translate(-50%, -100%) rotate(0deg); opacity: 1; }
+      100% { transform: translate(-50%, -100%) rotate(360deg); opacity: 1; }
+    }
+
+    .radar-grid {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border: 1px solid rgba(57, 255, 20, 0.4);
+      animation: gridPulse 4s ease-in-out infinite;
+    }
+
+    @keyframes gridPulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.8; }
+    }
+
+    .radar-grid:nth-child(1) { width: 360px; height: 360px; animation-delay: 0s; }
+    .radar-grid:nth-child(2) { width: 280px; height: 280px; animation-delay: 0.7s; }
+    .radar-grid:nth-child(3) { width: 200px; height: 200px; animation-delay: 1.4s; }
+    .radar-grid:nth-child(4) { width: 120px; height: 120px; animation-delay: 2.1s; }
+
+    .crosshairs { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+    }
+
+    .crosshairs::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 3px;
+      height: 100%;
+      background: linear-gradient(to bottom, transparent, rgba(57, 255, 20, 0.7), transparent);
+      transform: translateX(-50%);
+      animation: crosshairFlash 3s ease-in-out infinite;
+    }
+
+    .crosshairs::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(to right, transparent, rgba(57, 255, 20, 0.7), transparent);
+      transform: translateY(-50%);
+      animation: crosshairFlash 3s ease-in-out infinite 0.7s;
+    }
+
+    @keyframes crosshairFlash {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    .evidence-dot {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      background: #ff4444;
+      border-radius: 50%;
+      box-shadow: 0 0 20px #ff4444, 0 0 40px rgba(255, 68, 68, 0.6);
+      animation: evidencePulse 4s ease-in-out infinite;
+    }
+
+    @keyframes evidencePulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(2.2); }
+    }
+
+    .evidence-dot:nth-child(5) { top: 20%; left: 30%; animation-delay: 0s; }
+    .evidence-dot:nth-child(6) { top: 70%; left: 75%; animation-delay: 1.2s; }
+    .evidence-dot:nth-child(7) { top: 40%; left: 10%; animation-delay: 2.4s; }
+    .evidence-dot:nth-child(8) { top: 85%; left: 40%; animation-delay: 0.8s; }
+    .evidence-dot:nth-child(9) { top: 10%; left: 80%; animation-delay: 1.8s; }
+    .evidence-dot:nth-child(10) { top: 60%; left: 25%; animation-delay: 3.0s; }
+
+    .magnifying-glass {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      animation: magnifySearch 15s ease-in-out infinite;
+      z-index: 12;
+    }
+
+    .glass-lens {
+      width: 55px;
+      height: 55px;
+      border: 6px solid #39ff14;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(57, 255, 20, 0.15) 0%, rgba(57, 255, 20, 0.08) 100%);
+      box-shadow: 0 0 30px rgba(57, 255, 20, 0.7), inset 0 0 20px rgba(57, 255, 20, 0.25);
+      position: relative;
+      animation: lensGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes lensGlow {
+      0%, 100% { 
+        box-shadow: 0 0 30px rgba(57, 255, 20, 0.7), inset 0 0 20px rgba(57, 255, 20, 0.25);
+        transform: scale(1);
+      }
+      50% { 
+        box-shadow: 0 0 45px rgba(57, 255, 20, 0.9), inset 0 0 30px rgba(57, 255, 20, 0.35);
+        transform: scale(1.08);
+      }
+    }
+
+    .glass-handle {
+      position: absolute;
+      bottom: -28px;
+      right: -28px;
+      width: 35px;
+      height: 8px;
+      background: linear-gradient(45deg, #39ff14, #32cd32, #39ff14);
+      transform: rotate(45deg);
+      border-radius: 4px;
+      box-shadow: 0 0 12px rgba(57, 255, 20, 0.9);
+    }
+
+    @keyframes magnifySearch {
+      0% { top: 40px; left: 40px; transform: scale(1) rotate(0deg); }
+      20% { top: 80px; left: 320px; transform: scale(1.4) rotate(72deg); }
+      40% { top: 280px; left: 250px; transform: scale(1.2) rotate(144deg); }
+      60% { top: 240px; left: 60px; transform: scale(1.3) rotate(216deg); }
+      80% { top: 120px; left: 180px; transform: scale(1.1) rotate(288deg); }
+      100% { top: 40px; left: 40px; transform: scale(1) rotate(360deg); }
+    }
+
+    .detective-badge {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 110px;
+      height: 110px;
+      background: radial-gradient(circle at 35% 35%, #ffd700, #b8860b, #8b6914);
+      clip-path: polygon(50% 0%, 80% 30%, 100% 50%, 80% 70%, 50% 100%, 20% 70%, 0% 50%, 20% 30%);
+      animation: badgeShine 6s ease-in-out infinite;
+      box-shadow: 0 0 40px rgba(255, 215, 0, 0.8), inset 0 0 25px rgba(255, 255, 255, 0.4);
+      z-index: 20;
+    }
+
+    @keyframes badgeShine {
+      0%, 100% { 
+        filter: brightness(1) drop-shadow(0 0 20px gold); 
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+      }
+      50% { 
+        filter: brightness(2) drop-shadow(0 0 40px gold); 
+        transform: translate(-50%, -50%) scale(1.08) rotate(5deg);
+      }
+    }
+
+    .badge-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #001122;
+      font-weight: bold;
+      font-size: 11px;
+      text-align: center;
+      line-height: 1.2;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    .scanner-text {
+      position: absolute;
+      bottom: -80px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #39ff14;
+      font-family: 'Orbitron', monospace;
+      font-size: 18px;
+      text-align: center;
+      animation: scannerTextBlink 4s infinite;
+      text-shadow: 0 0 20px #39ff14, 0 0 40px rgba(57, 255, 20, 0.6);
+      white-space: nowrap;
+    }
+
+    @keyframes scannerTextBlink {
+      0%, 75% { opacity: 1; transform: translateX(-50%) scale(1); }
+      76%, 100% { opacity: 0.5; transform: translateX(-50%) scale(1.02); }
+    }
+
+    .helicopter-container {
+      position: fixed;
+      top: 8%;
+      left: -300px;
+      z-index: 1001;
+      animation: helicopterFlight 18s linear infinite;
+      opacity: 0.95;
+      pointer-events: none;
+    }
+
+    @keyframes helicopterFlight {
+      0% { left: -300px; transform: rotate(-3deg) scale(1); }
+      15% { left: calc(20% - 80px); transform: rotate(2deg) scale(1.1); }
+      35% { left: calc(40% - 60px); transform: rotate(-1deg) scale(1.05); }
+      55% { left: calc(60% - 40px); transform: rotate(3deg) scale(1.15); }
+      75% { left: calc(80% - 20px); transform: rotate(-2deg) scale(1.08); }
+      100% { left: calc(100% + 300px); transform: rotate(0deg) scale(1); }
+    }
+
+    .helicopter-body {
+      width: 140px;
+      height: 70px;
+      background: linear-gradient(145deg, #1a1a1a, #333333, #000000);
+      border-radius: 20px;
+      position: relative;
+      box-shadow: 0 0 25px rgba(255, 0, 0, 0.7), inset 0 5px 15px rgba(255, 255, 255, 0.3);
+    }
+
+    .helicopter-rotor {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 160px;
+      height: 10px;
+      background: linear-gradient(90deg, transparent, #ff0000, #ffffff, #ff0000, transparent);
+      border-radius: 5px;
+      animation: rotorSpin 0.08s linear infinite;
+      box-shadow: 0 0 15px rgba(57, 255, 20, 0.8);
+    }
+
+    @keyframes rotorSpin {
+      0% { transform: translateX(-50%) rotate(0deg); }
+      100% { transform: translateX(-50%) rotate(360deg); }
+    }
+
+    .helicopter-tail {
+      position: absolute;
+      right: -50px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 60px;
+      height: 18px;
+      background: linear-gradient(45deg, #333333, #1a1a1a, #000000);
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+    }
+
+    .helicopter-tail-rotor {
+      position: absolute;
+      right: -15px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 25px;
+      height: 5px;
+      background: linear-gradient(45deg, #ff0000, #ffffff);
+      animation: tailRotorSpin 0.04s linear infinite;
+      border-radius: 3px;
+    }
+
+    @keyframes tailRotorSpin {
+      0% { transform: translateY(-50%) rotate(0deg); }
+      100% { transform: translateY(-50%) rotate(360deg); }
+    }
+
+    .logo-cargo {
+      position: absolute;
+      bottom: -35px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 50px;
+      background: url('logo.png') center/contain no-repeat, 
+                  radial-gradient(circle, rgba(255, 255, 255, 0.9), rgba(57, 255, 20, 0.8));
+      border: 3px solid #39ff14;
+      border-radius: 50%;
+      box-shadow: 0 0 20px rgba(57, 255, 20, 0.9), 0 5px 15px rgba(0, 0, 0, 0.3);
+      animation: cargoSway 2s ease-in-out infinite;
+    }
+
+    @keyframes cargoSway {
+      0%, 100% { transform: translateX(-50%) rotate(-2deg); }
+      50% { transform: translateX(-50%) rotate(2deg); }
+    }
+
+    .helicopter-lights {
+      position: absolute;
+      top: 25px;
+      left: 15px;
+      width: 10px;
+      height: 10px;
+      background: #ff0000;
+      border-radius: 50%;
+      animation: helicopterBlink 1.2s infinite;
+      box-shadow: 0 0 15px #ff0000;
+    }
+
+    .helicopter-lights:nth-child(6) {
+      left: 115px;
+      background: #0066ff;
+      box-shadow: 0 0 15px #0066ff;
+      animation-delay: 0.6s;
+    }
+
+    @keyframes helicopterBlink {
+      0%, 60% { opacity: 1; }
+      61%, 100% { opacity: 0.2; }
+    }
+
+    .index-main-content {
+      min-height: calc(100vh - 120px);
+      padding-bottom: 200px !important;
+      position: relative;
+      z-index: 10;
+    }
+
+    .priority-pills {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .priority-pill {
+      padding: 8px 16px;
+      border-radius: 25px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .priority-pill.ai-predicted {
+      background: linear-gradient(45deg, #17a2b8, #6f42c1);
+      color: white;
+      border-color: #17a2b8;
+    }
+
+    .priority-pill.investigator-assigned {
+      background: linear-gradient(45deg, #28a745, #20c997);
+      color: white;
+      border-color: #28a745;
+    }
+
+    .priority-pill.high {
+      background: linear-gradient(45deg, #dc3545, #fd7e14);
+      border-color: #dc3545;
+    }
+
+    .priority-pill.medium {
+      background: linear-gradient(45deg, #ffc107, #fd7e14);
+      color: #000;
+      border-color: #ffc107;
+    }
+
+    .priority-pill.low {
+      background: linear-gradient(45deg, #28a745, #20c997);
+      border-color: #28a745;
+    }
+
+    .public-report-section {
+      background: rgba(255, 255, 255, 0.08);
+      border: 2px solid rgba(57, 255, 20, 0.4);
+      border-radius: 20px;
+      padding: 40px;
+      margin: 50px 0;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(15px);
+    }
+
+    .report-btn {
+      background: linear-gradient(45deg, #fd7e14, #ffc107, #fd7e14);
+      border: none;
+      color: #000;
+      font-weight: bold;
+      padding: 18px 35px;
+      border-radius: 30px;
+      font-size: 1.2rem;
+      box-shadow: 0 6px 20px rgba(253, 126, 20, 0.5);
+      transition: all 0.4s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .report-btn:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 10px 30px rgba(253, 126, 20, 0.7);
+      background: linear-gradient(45deg, #ffc107, #fd7e14, #ffc107);
+    }
+
+    .investigator-button-section {
+      margin: 80px 0 120px 0;
+      position: relative;
+      z-index: 100;
+    }
+
+    .login-btn {
+      background: linear-gradient(45deg, #39ff14, #32cd32, #39ff14);
+      color: #000000;
+      border: none;
+      padding: 22px 45px;
+      font-size: 1.4rem;
+      box-shadow: 0 0 40px rgba(57, 255, 20, 0.5);
+      border-radius: 35px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      transition: all 0.4s ease;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-4px) scale(1.08);
+      box-shadow: 0 15px 50px rgba(57, 255, 20, 0.7);
+      background: linear-gradient(45deg, #32cd32, #39ff14, #32cd32);
+    }
+
+    @media (max-width: 768px) {
+      #investigation-scanner { 
+        width: 320px; 
+        height: 320px; 
+      }
+      .helicopter-container {
+        display: none;
+      }
+      .magnifying-glass { 
+        width: 60px; 
+        height: 60px; 
+      }
+      .glass-lens { 
+        width: 40px; 
+        height: 40px; 
+      }
+      .detective-badge { 
+        width: 85px; 
+        height: 85px; 
+      }
+      .scanner-text { 
+        font-size: 14px; 
+      }
+      .index-main-content { 
+        padding-bottom: 220px !important; 
+      }
+      .investigator-button-section { 
+        margin: 50px 0 140px 0; 
+      }
+      .priority-pills { 
+        justify-content: center; 
+      }
+    }
+
+    @media (max-width: 576px) {
+      .index-main-content { 
+        padding-bottom: 250px !important; 
+      }
+      .public-report-section {
+        padding: 30px 20px;
+        margin: 30px 0;
+      }
+      .login-btn {
+        font-size: 1.2rem;
+        padding: 18px 35px;
+      }
+      .report-btn {
+        font-size: 1.1rem;
+        padding: 15px 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="particles-js"></div>
+
+  <div id="globe-container">
+    <div id="investigation-scanner">
+      <div class="radar-grid"></div>
+      <div class="radar-grid"></div>
+      <div class="radar-grid"></div>
+      <div class="radar-grid"></div>
+      <div class="crosshairs"></div>
+      <div class="radar-sweep"></div>
+      <div class="evidence-dot"></div>
+      <div class="evidence-dot"></div>
+      <div class="evidence-dot"></div>
+      <div class="evidence-dot"></div>
+      <div class="evidence-dot"></div>
+      <div class="evidence-dot"></div>
+      <div class="detective-badge">
+        <div class="badge-text">SAFE<br>TRACER<br>by<br>NIDHIN R</div>
+      </div>
+      <div class="magnifying-glass">
+        <div class="glass-lens"></div>
+        <div class="glass-handle"></div>
+      </div>
+      <div class="scanner-text">🔍 AI INVESTIGATION SCANNER ACTIVE 🔍</div>
+    </div>
+  </div>
+
+  <div class="helicopter-container">
+    <div class="helicopter-body">
+      <div class="helicopter-rotor"></div>
+      <div class="helicopter-tail">
+        <div class="helicopter-tail-rotor"></div>
+      </div>
+      <div class="helicopter-text" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #ff0000; font-weight: bold; font-size: 10px; font-family: 'Orbitron', monospace; text-shadow: 0 0 5px #ff0000;">SAFE TRACER</div>
+      <div class="logo-cargo"></div>
+      <div class="helicopter-lights"></div>
+      <div class="helicopter-lights"></div>
+    </div>
+  </div>
+
+  <div id="activeBanners"></div>
+
+  <div class="container text-center mt-4 index-main-content">
+    <div class="logo-container">
+      <img src="logo.png" alt="Safe Tracer Logo" id="logo-top">
+      <div class="ai-badge">by NIDHIN R</div>
+    </div>
+
+    <h1 class="main-title">SAFE TRACER by NIDHIN R</h1>
+    <p class="lead subtitle">
+      AI-Powered Community Intelligence Platform for Modern Investigations<br>
+      <span class="police">TOGETHER WE TRACE</span>
+    </p>
+
+    <div class="ai-status-bar mb-4">
+      <div class="ai-indicator" id="aiStatus">
+        <span class="ai-dot"></span>
+        <span id="aiStatusText">AI Systems: Initializing...</span>
+      </div>
+    </div>
+
+    <div class="public-report-section">
+      <h4>📢 Report New Case to Authorities</h4>
+      <p class="mb-3">Have information about a new case? Report it directly to investigators for review.</p>
+      <button class="btn report-btn" onclick="openPublicReportModal()">
+        📝 Submit Case Report
+      </button>
+    </div>
+
+    <div id="clues-container" class="row justify-content-center my-5">
+      <div class="col-12">
+        <div class="loading-spinner">
+          <div class="spinner"></div>
+          <p>Loading AI-processed investigation clues...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="notices-section mb-5">
+      <h4 class="text-center mb-4">📢 Official Notices</h4>
+      <div id="activeNotices" class="row justify-content-center"></div>
+    </div>
+
+    <div class="investigator-button-section">
+      <button id="investigatorLoginBtn" class="btn btn-primary btn-lg login-btn">
+        🔐 Investigator Dashboard
+      </button>
+    </div>
+  </div>
+
+  <div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title" id="imageModalTitle">Case Evidence</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center">
+          <img id="modalImage" src="" alt="Case Evidence" style="max-width: 100%; max-height: 80vh;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="publicReportModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title">📢 Submit Case Report to Investigators</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-info">
+            <strong>🔒 Anonymous Reporting</strong><br>
+            Your report will be reviewed by investigators. You can remain anonymous or provide contact information if you wish.
+          </div>
+
+          <div class="mb-3">
+            <label for="reportDescription" class="form-label">Case Description *</label>
+            <textarea id="reportDescription" class="form-control" rows="4" 
+                      placeholder="Describe the case you want to report. Include as much detail as possible (location, time, people involved, etc.)..." 
+                      required></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label for="reportImage" class="form-label">Evidence Image (Optional)</label>
+            <input type="file" id="reportImage" class="form-control" accept="image/*">
+            <small class="text-muted">Upload any relevant image evidence you have</small>
+            <div id="reportImagePreview" class="mt-2"></div>
+          </div>
+
+          <div class="mb-3">
+            <label for="reportContact" class="form-label">Contact Information (Optional)</label>
+            <input type="text" id="reportContact" class="form-control" 
+                   placeholder="Your email or phone number (if you want investigators to contact you)">
+            <small class="text-muted">Leave blank to remain completely anonymous</small>
+          </div>
+
+          <div class="form-check mb-3">
+            <input type="checkbox" id="reportConfirmation" class="form-check-input" required>
+            <label for="reportConfirmation" class="form-check-label">
+              <strong>I confirm that this report is submitted in good faith and contains accurate information to the best of my knowledge.</strong>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-warning" id="submitReportBtn">
+            📤 Submit Report to Investigators
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-content">
+      <img src="logo.png" width="24" height="24" alt="logo" class="footer-logo">
+      <strong>Developed by NIDHIN R</strong> | AI-Powered Safe Tracer | r.nidhinofficial@gmail.com
+      <div class="ai-badge-small">Powered by Artificial Intelligence</div>
+      <div class="device-info-container" style="margin-top: 5px;">
+        <small class="text-muted">
+          🖥️ Device: <span id="currentDevice">Loading...</span> | 
+          🌐 IP: <span id="currentIP">Loading...</span>
+        </small>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="script.js"></script>
+  
+</body>
+</html>

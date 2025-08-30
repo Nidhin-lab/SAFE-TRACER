@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Safe Tracer by NIDHIN R - AI Investigation Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Orbitron', monospace;
+      background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 20s ease infinite;
+      color: #ffffff;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    #particles-js {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .helicopter-animation {
+      position: fixed;
+      top: 15%;
+      left: -250px;
+      z-index: 1000;
+      animation: helicopterFlight 15s linear infinite;
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    @keyframes helicopterFlight {
+      0% { left: -250px; transform: rotate(-2deg); }
+      25% { left: calc(25% - 50px); transform: rotate(1deg); }
+      50% { left: calc(50% - 50px); transform: rotate(-1deg); }
+      75% { left: calc(75% - 50px); transform: rotate(2deg); }
+      100% { left: calc(100% + 250px); transform: rotate(0deg); }
+    }
+
+    .helicopter-body {
+      width: 120px;
+      height: 60px;
+      background: linear-gradient(45deg, #000000, #202020);
+      border-radius: 15px;
+      position: relative;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .helicopter-rotor {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 140px;
+      height: 8px;
+      background: linear-gradient(90deg, transparent, #000000, transparent);
+      border-radius: 4px;
+      animation: rotorSpin 0.1s linear infinite;
+    }
+
+    @keyframes rotorSpin {
+      0% { transform: translateX(-50%) rotate(0deg); }
+      100% { transform: translateX(-50%) rotate(360deg); }
+    }
+
+    .helicopter-tail {
+      position: absolute;
+      right: -40px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 50px;
+      height: 15px;
+      background: linear-gradient(45deg, #202020, #303030);
+      border-radius: 8px;
+    }
+
+    .helicopter-tail-rotor {
+      position: absolute;
+      right: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 4px;
+      background: #000000;
+      animation: tailRotorSpin 0.05s linear infinite;
+    }
+
+    @keyframes tailRotorSpin {
+      0% { transform: translateY(-50%) rotate(0deg); }
+      100% { transform: translateY(-50%) rotate(360deg); }
+    }
+
+    .logo-cargo {
+      position: absolute;
+      bottom: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 40px;
+      background: url('logo.png') center/contain no-repeat;
+      border: 2px solid #000000;
+      border-radius: 50%;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      color: white;
+    }
+
+    .helicopter-lights {
+      position: absolute;
+      top: 20px;
+      left: 10px;
+      width: 8px;
+      height: 8px;
+      background: #ff0000;
+      border-radius: 50%;
+      animation: helicopterBlink 1s infinite;
+      box-shadow: 0 0 10px #ff0000;
+    }
+
+    @keyframes helicopterBlink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0.3; }
+    }
+
+    .police-car-animation {
+      position: fixed;
+      bottom: 20px;
+      left: -200px;
+      z-index: 999;
+      animation: policeCruise 25s linear infinite;
+      opacity: 0.8;
+      font-size: 3rem;
+    }
+
+    @keyframes policeCruise {
+      0% { left: -200px; transform: rotate(0deg); }
+      25% { left: calc(25% - 50px); transform: rotate(-5deg); }
+      50% { left: calc(50% - 50px); transform: rotate(0deg); }
+      75% { left: calc(75% - 50px); transform: rotate(5deg); }
+      100% { left: calc(100% + 200px); transform: rotate(0deg); }
+    }
+
+    .police-lights {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 15px;
+      background: linear-gradient(90deg, #ff0000 50%, #0066ff 50%);
+      border-radius: 8px;
+      animation: policeFlash 0.4s infinite;
+      box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+    }
+
+    @keyframes policeFlash {
+      0%, 50% { opacity: 1; box-shadow: 0 0 20px rgba(255, 0, 0, 0.8); }
+      51%, 100% { opacity: 0.3; box-shadow: 0 0 20px rgba(0, 102, 255, 0.8); }
+    }
+
+    .vehicle-effects {
+      position: fixed;
+      top: 30px;
+      right: 30px;
+      z-index: 998;
+      opacity: 0.6;
+    }
+
+    .radar-scan {
+      width: 80px;
+      height: 80px;
+      border: 3px solid #ff0000;
+      border-radius: 50%;
+      position: relative;
+      animation: radarPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes radarPulse {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(1.8); opacity: 0; }
+    }
+
+    .radar-sweep {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 3px;
+      height: 35px;
+      background: linear-gradient(to top, #ff0000, transparent);
+      transform-origin: bottom center;
+      transform: translate(-50%, -100%) rotate(0deg);
+      animation: sweep 2s linear infinite;
+      box-shadow: 0 0 10px #ff0000;
+    }
+
+    @keyframes sweep {
+      0% { transform: translate(-50%, -100%) rotate(0deg); }
+      100% { transform: translate(-50%, -100%) rotate(360deg); }
+    }
+
+    .main-title {
+      font-size: 3.5rem;
+      font-weight: 900;
+      text-shadow: 0 0 30px #ff0000, 0 0 60px #ff0000;
+      color: #ff0000;
+      letter-spacing: 4px;
+      margin-bottom: 1rem;
+      animation: titleGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes titleGlow {
+      0% { text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000; }
+      100% { text-shadow: 0 0 40px #ff0000, 0 0 80px #ff0000; }
+    }
+
+    .admin-title {
+      font-size: 2.5rem;
+      color: #ff0000;
+      text-shadow: 0 0 20px #ff0000;
+      margin-bottom: 0.5rem;
+    }
+
+    .admin-subtitle {
+      color: #cccccc;
+      margin-bottom: 2rem;
+    }
+
+    #logo-top, #admin-logo {
+      width: 140px !important;
+      height: 140px !important;
+      border-radius: 20px !important;
+      border: 4px solid #ff0000;
+      box-shadow: 0 0 40px rgba(255, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.2);
+      padding: 4px !important;
+      transition: all 0.3s ease;
+      object-fit: contain !important;
+    }
+
+    #logo-top:hover, #admin-logo:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 60px rgba(255, 0, 0, 0.8);
+    }
+
+    .btn {
+      font-family: 'Orbitron', monospace;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary {
+      background: linear-gradient(45deg, #ff0000, #cc0000);
+      border: none;
+      color: #000000;
+    }
+
+    .btn-success {
+      background: linear-gradient(45deg, #28a745, #20c997);
+      border: none;
+    }
+
+    .btn-info {
+      background: linear-gradient(45deg, #17a2b8, #6f42c1);
+      border: none;
+    }
+
+    .btn-warning {
+      background: linear-gradient(45deg, #ffc107, #fd7e14);
+      border: none;
+      color: #000000;
+    }
+
+    .btn-purple {
+      background: linear-gradient(45deg, #6f42c1, #e83e8c);
+      border: none;
+      color: white;
+    }
+
+    .btn-pink {
+      background: linear-gradient(45deg, #e83e8c, #fd7e14);
+      border: none;
+      color: white;
+    }
+
+    .btn-secondary {
+      background: linear-gradient(45deg, #6c757d, #495057);
+      border: none;
+    }
+
+    .form-control, .login-input {
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 0, 0, 0.3);
+      border-radius: 10px;
+      color: #ffffff;
+      padding: 12px 15px;
+      font-family: 'Orbitron', monospace;
+    }
+
+    .form-control:focus, .login-input:focus {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: #ff0000;
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+      color: #ffffff;
+      outline: none;
+    }
+
+    .form-control::placeholder, .login-input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .login-section {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 60vh;
+    }
+
+    .login-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 0, 0, 0.3);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 450px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    .login-title {
+      text-align: center;
+      color: #ff0000;
+      margin-bottom: 30px;
+    }
+
+    .login-footer {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .dashboard-section {
+      display: none;
+    }
+
+    .nav-pills .nav-link {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 0, 0, 0.3);
+      color: #ffffff;
+      margin-right: 10px;
+    }
+
+    .nav-pills .nav-link.active {
+      background: linear-gradient(45deg, #ff0000, #cc0000);
+      color: #000000;
+      border-color: #ff0000;
+    }
+
+    .tab-content {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 15px;
+      padding: 20px;
+    }
+
+    .ai-status-panel, .quick-actions-card, .stat-card, .investigations-card, .chart-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 0, 0, 0.3);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .ai-status-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .ai-status-indicators {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .status-dot.online {
+      background: #28a745;
+      box-shadow: 0 0 10px rgba(40, 167, 69, 0.6);
+    }
+
+    .status-dot.offline {
+      background: #dc3545;
+      box-shadow: 0 0 10px rgba(220, 53, 69, 0.6);
+    }
+
+    .stat-card {
+      text-align: center;
+      padding: 30px 20px;
+      transition: all 0.3s ease;
+    }
+
+    .stat-icon {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+    }
+
+    .stat-content h5 {
+      font-size: 2rem;
+      color: #ff0000;
+      margin-bottom: 5px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .action-buttons .btn {
+      flex: 1;
+      min-width: 150px;
+      padding: 12px 20px;
+    }
+
+    .table-dark {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .table-dark th {
+      background: rgba(255, 0, 0, 0.2);
+      border-color: rgba(255, 0, 0, 0.3);
+      color: #ff0000;
+    }
+
+    .table-dark td {
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .loading-spinner {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      border: 3px solid rgba(255, 0, 0, 0.3);
+      border-radius: 50%;
+      border-top-color: #ff0000;
+      animation: spin 1s ease-in-out infinite;
+      margin-bottom: 10px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .site-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      padding: 15px;
+      text-align: center;
+      border-top: 1px solid rgba(255, 0, 0, 0.3);
+      z-index: 1000;
+    }
+
+    .footer-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .footer-logo {
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
+    }
+
+    .badge {
+      font-family: 'Orbitron', monospace;
+      font-weight: bold;
+      padding: 6px 12px;
+      border-radius: 20px;
+    }
+
+    .alert {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 0, 0, 0.3);
+      border-radius: 10px;
+      color: #ffffff;
+    }
+
+    .no-data-message {
+      text-align: center;
+      padding: 40px;
+      color: #cccccc;
+    }
+
+    .container {
+      padding-bottom: 120px !important;
+    }
+
+    .image-thumbnail {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      cursor: pointer;
+      border: 2px solid #ff0000;
+      border-radius: 5px;
+      transition: transform 0.2s ease-in-out;
+    }
+
+    .image-thumbnail:hover {
+      transform: scale(1.05);
+    }
+
+    .evidence-gallery {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .case-evidence-section {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 0, 0, 0.3);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .case-evidence-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 0, 0, 0.3);
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    .case-evidence-header h5 {
+      color: #ff0000;
+      margin-bottom: 0;
+    }
+
+    .full-image-modal .modal-content {
+      background: rgba(0, 0, 0, 0.9);
+    }
+
+    .full-image-modal .modal-body {
+      text-align: center;
+      padding: 0;
+    }
+
+    .full-image-modal img {
+      max-width: 100%;
+      max-height: calc(100vh - 150px);
+      display: block;
+      margin: auto;
+    }
+
+    @media (max-width: 768px) {
+      .main-title {
+        font-size: 2.5rem;
+      }
+      .admin-title {
+        font-size: 2rem;
+      }
+      .action-buttons {
+        flex-direction: column;
+      }
+      .action-buttons .btn {
+        width: 100%;
+        margin-bottom: 10px;
+        min-width: auto;
+      }
+      #logo-top, #admin-logo {
+        width: 120px !important;
+        height: 120px !important;
+      }
+      .container {
+        padding-bottom: 140px !important;
+      }
+      .helicopter-animation {
+        display: none;
+      }
+      .police-car-animation {
+        display: none;
+      }
+      .vehicle-effects {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="particles-js"></div>
+
+  <div class="helicopter-animation">
+    <div class="helicopter-body">
+      <div class="helicopter-rotor"></div>
+      <div class="helicopter-tail">
+        <div class="helicopter-tail-rotor"></div>
+      </div>
+      <div class="logo-cargo">SAFE TRACER</div>
+      <div class="helicopter-lights"></div>
+    </div>
+  </div>
+
+  <div class="police-car-animation">
+    🚔
+    <div class="police-lights"></div>
+  </div>
+
+  <div class="vehicle-effects">
+    <div class="radar-scan">
+      <div class="radar-sweep"></div>
+    </div>
+  </div>
+
+  <div class="container mt-4">
+    <div class="text-center mb-4">
+      <img src="logo.png" alt="Safe Tracer Logo" id="admin-logo">
+      <h1 class="admin-title">🛡️ Safe Tracer by NIDHIN R - Investigator Dashboard</h1>
+      <p class="admin-subtitle">AI-Powered Investigation Portal</p>
+    </div>
+
+    <div id="loginSection" class="login-section">
+      <div class="login-card">
+        <h3 class="login-title">🔐 Secure AI Authentication</h3>
+        <form id="loginForm">
+          <div class="mb-3">
+            <label for="email" class="form-label">Investigator Email</label>
+            <input type="email" id="email" class="form-control login-input" placeholder="Enter Email here" required>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Secure Password</label>
+            <input type="password" id="password" class="form-control login-input" placeholder="Enter your password" required>
+          </div>
+          <button type="submit" class="btn btn-primary w-100 login-submit-btn">
+            🔓 Access AI Dashboard
+          </button>
+        </form>
+        <div class="login-footer">
+          <button class="btn btn-outline-light btn-sm" onclick="window.location.href='index.html'">
+            ← Return to Public Site
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="dashboardSection" class="dashboard-section">
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="alert alert-info">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+              <div>
+                <strong>🛠️ System Recovery Tools:</strong>
+                <small class="text-muted d-block">Use if system gets stuck or won't load</small>
+              </div>
+              <div class="btn-group flex-wrap">
+                <button class="btn btn-sm btn-success" onclick="safeRefreshData()">
+                  🔄 Safe Refresh
+                </button>
+                <button class="btn btn-sm btn-info" onclick="loadDashboardData()">
+                  📊 Reload Data
+                </button>
+                <button class="btn btn-sm btn-warning" onclick="emergencyReset()">
+                  🚨 Emergency Reset
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="window.location.reload()">
+                  🔁 Hard Reload
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ul class="nav nav-pills mb-4" id="dashboardTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="main-tab" data-bs-toggle="pill" data-bs-target="#main-panel" type="button" role="tab">
+            🔍 Main Dashboard
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="reports-tab" data-bs-toggle="pill" data-bs-target="#reports-panel" type="button" role="tab">
+            📄 Public Reports <span class="badge bg-danger" id="pendingReportsBadge" style="display: none;">0</span>
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="notices-tab" data-bs-toggle="pill" data-bs-target="#notices-panel" type="button" role="tab">
+            📢 Notices & Banners
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content" id="dashboardTabContent">
+        <div class="tab-pane fade show active" id="main-panel" role="tabpanel">
+          <div class="row mb-4">
+
+            <div class="col-12 mb-4">
+                <div class="card bg-dark border-success">
+                    <div class="card-header">
+                        <h5 class="card-title text-success mb-0">
+                            📢 Public Notices & Banners Management
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <button class="btn btn-success" onclick="createNotice()">
+                                    📝 Create New Notice
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-warning" onclick="createBanner()">
+                                    🎯 Create New Banner
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-dark table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Title</th>
+                                        <th>Content</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="noticesTableBody">
+                                    <tr>
+                                        <td colspan="6" class="text-center">Loading notices and banners...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+              <div class="ai-status-panel">
+                <div class="ai-status-header">
+                  <h4>🤖 Safe Tracer by NIDHIN R - AI System Status</h4>
+                  <div class="ai-status-indicators">
+                    <div class="status-dot" id="aiStatus"></div>
+                    <span>AI Status</span>
+                    <div class="status-dot" id="supabaseStatus"></div>
+                    <span>Database</span>
+                    <button class="btn btn-sm btn-outline-success" id="refreshStatusBtn">🔄 Refresh Status</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-4">
+            <div class="col-md-12">
+              <div class="quick-actions-card">
+                <h4>🎛️ Safe Tracer by NIDHIN R - AI Investigation Controls</h4>
+                <div class="action-buttons">
+                  <button class="btn btn-success" id="uploadClueBtn">🤖 AI Upload & Sanitize Evidence</button>
+                  <button class="btn btn-info" id="generateAIReportBtn">📊 Generate AI Report</button>
+                  <button class="btn btn-warning" id="correlateDataBtn">🔗 AI Correlation Analysis</button>
+                  <button class="btn btn-purple" id="refreshDashboardBtn">🔄 Refresh AI Data</button>
+                  <button class="btn btn-pink" id="generateReportBtn">📄 Generate Confidential Report</button>
+                  <button class="btn btn-secondary" id="logoutBtn">🚪 Secure Logout</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-4">
+            <div class="col-md-2">
+              <div class="stat-card">
+                <div class="stat-icon">🔍</div>
+                <div class="stat-content">
+                  <h5 id="totalClues">0</h5>
+                  <p>Active Cases</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="stat-card">
+                <div class="stat-icon">💬</div>
+                <div class="stat-content">
+                  <h5 id="totalTips">0</h5>
+                  <p>Anonymous Tips</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="stat-card">
+                <div class="stat-icon">🤖</div>
+                <div class="stat-content">
+                  <h5 id="aiProcessed">0</h5>
+                  <p>AI Processed</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="stat-card">
+                <div class="stat-icon">🔗</div>
+                <div class="stat-content">
+                  <h5 id="correlations">0</h5>
+                  <p>AI Correlations</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="stat-card">
+                <div class="stat-icon">⚠️</div>
+                <div class="stat-content">
+                  <h5 id="highRisk">0</h5>
+                  <p>High Priority</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-content">
+                  <h5 id="resolved">0</h5>
+                  <p>Resolved</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12">
+              <div class="investigations-card">
+                <h4>📋 Safe Tracer by NIDHIN R - AI-Powered Active Investigations</h4>
+                <div class="table-responsive">
+                  <table class="table table-dark table-striped" id="investigationsTable">
+                    <thead>
+                      <tr>
+                        <th>Case ID</th>
+                        <th>Description</th>
+                        <th>Tips</th>
+                        <th>Priority</th>
+                        <th>AI Risk</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="investigationsTableBody">
+                      <tr>
+                        <td colspan="7" class="text-center">
+                          <div class="loading-spinner">
+                            <div class="spinner"></div>
+                            Loading investigations...
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="reports-panel" role="tabpanel">
+          <div class="row mb-4">
+            <div class="col-12">
+              <div class="investigations-card">
+                <h4>📢 Public Citizen Reports - Investigator's Overview (ALL REPORTS VISIBLE)</h4>
+                <div class="table-responsive">
+                  <table class="table table-dark table-striped" id="publicReportsTable">
+                    <thead>
+                      <tr>
+                        <th>Report ID</th>
+                        <th>Description</th>
+                        <th>Submitted</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="publicReportsTableBody">
+                      <tr>
+                        <td colspan="5" class="text-center">
+                          <div class="loading-spinner">
+                            <div class="spinner"></div>
+                            Loading all public reports...
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="notices-panel" role="tabpanel">
+          <div class="row mb-4">
+            <div class="col-12">
+              <div class="investigations-card">
+                <h4>📢 Public Notices & Banners Management</h4>
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <button class="btn btn-success" onclick="createNotice()">
+                      📝 Create Notice
+                    </button>
+                  </div>
+                  <div class="col-md-6">
+                    <button class="btn btn-warning" onclick="createBanner()">
+                      🎯 Create Banner
+                    </button>
+                  </div>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-dark table-striped">
+                    <thead>
+                      <tr>
+                        <th>Type</th>
+                        <th>Title</th>
+                        <th>Content</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="allNoticesTableBody">
+                      <tr>
+                        <td colspan="6" class="text-center">
+                          <div class="loading-spinner">
+                            <div class="spinner"></div>
+                            Loading notices and banners...
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-4">
+        <div class="col-md-8 offset-md-2">
+          <div class="chart-card">
+            <h5>📊 Safe Tracer by NIDHIN R - AI Risk Assessment Distribution</h5>
+            <canvas id="riskChart" style="max-height: 400px;"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="fileUploadModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title">📁 Upload Evidence - Enhanced Privacy Control</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Evidence Type:</label>
+            <div class="btn-group w-100 mb-3" role="group">
+              <input type="radio" class="btn-check" name="caseType" id="newCaseType" value="new" checked>
+              <label class="btn btn-outline-success" for="newCaseType">🆕 New Case</label>
+              <input type="radio" class="btn-check" name="caseType" id="existingCaseType" value="existing">
+              <label class="btn btn-outline-info" for="existingCaseType">📎 Add to Existing Case</label>
+            </div>
+          </div>
+
+          <div id="caseSelection" class="mb-3" style="display: none;">
+            <label for="existingCaseSelect" class="form-label">Select Existing Case:</label>
+            <select id="existingCaseSelect" class="form-select">
+              <option value="">Loading cases...</option>
+            </select>
+            <small class="text-muted">Add evidence to an existing investigation (same case number)</small>
+          </div>
+
+          <div class="mb-3">
+            <label for="evidenceDescription" class="form-label">Case Description / Evidence Details</label>
+            <textarea id="evidenceDescription" class="form-control" rows="3" placeholder="Enter detailed case description or evidence details for AI processing..."></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Choose Upload Method:</label>
+            <div class="btn-group w-100 mb-3" role="group">
+              <input type="radio" class="btn-check" name="uploadMethod" id="urlMethod" value="url" checked>
+              <label class="btn btn-outline-info" for="urlMethod">🔗 Image URL</label>
+              <input type="radio" class="btn-check" name="uploadMethod" id="fileMethod" value="file">
+              <label class="btn btn-outline-success" for="fileMethod">📁 Direct Upload</label>
+            </div>
+          </div>
+
+          <div id="urlUploadSection" class="mb-3">
+            <label for="evidenceUrl" class="form-label">Evidence Image URL</label>
+            <input type="url" id="evidenceUrl" class="form-control" placeholder="https://example.com/evidence.jpg">
+            <small class="text-muted">Paste the direct URL of the evidence image</small>
+          </div>
+
+          <div id="fileUploadSection" class="mb-3" style="display: none;">
+            <label for="evidenceFile" class="form-label">Evidence Image File</label>
+            <input type="file" id="evidenceFile" class="form-control" accept="image/*">
+            <small class="text-muted">Supported formats: JPG, PNG, GIF (Max: 10MB)</small>
+          </div>
+
+          <div class="mb-3" id="imagePreview" style="display: none;">
+            <label class="form-label">Preview</label>
+            <div class="text-center">
+              <img id="previewImage" src="" alt="Preview" style="max-width: 100%; max-height: 300px; border-radius: 8px; border: 2px solid #ff0000;">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <div class="form-check">
+              <input type="checkbox" id="uploadConfirmation" class="form-check-input">
+              <label for="uploadConfirmation" class="form-check-label">
+                <strong>I confirm this evidence is legitimate and I authorize AI privacy protection and processing</strong>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-success" id="uploadConfirmBtn" disabled>
+            <span id="uploadBtnText">🤖 AI Process & Upload</span>
+            <div class="spinner-border spinner-border-sm ms-2" id="uploadSpinner" style="display: none;"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="imagePreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title">🔍 Investigator Image Review - Privacy Control</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-6">
+              <h6>🤖 AI-Processed Image (Public View)</h6>
+              <div class="text-center mb-3">
+                <img id="aiProcessedImage" src="" alt="AI Processed" style="max-width: 100%; border: 2px solid #ff0000; border-radius: 8px;">
+              </div>
+              <div class="d-grid gap-2">
+                <button class="btn btn-success" onclick="approveImage()">✅ Approve for Public</button>
+                <button class="btn btn-warning" onclick="openBlurEditor()">🎨 Manual Blur Editor</button>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <h6>🔒 Original Image (Investigator Only)</h6>
+              <div class="text-center mb-3">
+                <img id="originalImage" src="" alt="Original" style="max-width: 100%; border: 2px solid #dc3545; border-radius: 8px;">
+              </div>
+              <div class="alert alert-warning">
+                <small><strong>⚠️ CONFIDENTIAL:</strong> This unblurred image is for investigator review only.</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="blurEditorModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title">🎨 Manual Blur Editor - Select Areas to Blur</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center">
+          <div class="mb-3">
+            <div class="alert alert-info">
+              <strong>Instructions:</strong> Click and drag to select areas you want to blur for privacy protection.
+            </div>
+          </div>
+          <canvas id="blurEditorCanvas" style="max-width: 100%; border: 2px solid #ff0000; cursor: crosshair;"></canvas>
+          <div class="mt-3">
+            <button class="btn btn-warning" onclick="clearBlurAreas()">🗑️ Clear All Blur Areas</button>
+            <button class="btn btn-info" onclick="previewBlur()">👁️ Preview Result</button>
+            <button class="btn btn-success" onclick="saveBlurredImage()">💾 Save & Approve</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="caseDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title" id="caseDetailsTitle">🔍 Case Details</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="caseDetailsBody"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="noticeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title" id="noticeModalTitle">📝 Create Notice</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="noticeForm">
+            <input type="hidden" id="noticeId" value="">
+            <input type="hidden" id="noticeType" value="notice">
+            
+            <div class="mb-3">
+              <label for="noticeTitle" class="form-label">Title</label>
+              <input type="text" id="noticeTitle" class="form-control" placeholder="Enter notice title" required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="noticeContent" class="form-label">Content</label>
+              <textarea id="noticeContent" class="form-control" rows="4" placeholder="Enter notice content" required></textarea>
+            </div>
+            
+            <div class="mb-3" id="bannerStyleSection" style="display: none;">
+              <label for="bannerStyle" class="form-label">Banner Style</label>
+              <select id="bannerStyle" class="form-select">
+                <option value="info">Info (Blue)</option>
+                <option value="warning">Warning (Yellow)</option>
+                <option value="danger">Alert (Red)</option>
+                <option value="success">Success (Green)</option>
+              </select>
+            </div>
+            
+            <div class="mb-3" id="bannerImageSection" style="display: none;">
+              <label for="bannerImage" class="form-label">Banner Image (Optional)</label>
+              <input type="file" id="bannerImage" class="form-control" accept="image/*">
+              <small class="text-muted">Upload PNG, JPG, or other image formats (Max: 5MB)</small>
+              <div id="bannerImagePreview" class="mt-2"></div>
+            </div>
+            
+            <div class="form-check mb-3">
+              <input type="checkbox" id="noticeActive" class="form-check-input" checked>
+              <label for="noticeActive" class="form-check-label">Active (visible to public)</label>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-success" onclick="saveNotice()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-content">
+      <img src="logo.png" width="24" height="24" alt="logo" class="footer-logo">
+      <strong>Developed by NIDHIN R</strong> | AI-Powered Safe Tracer Dashboard | r.nidhinofficial@gmail.com
+      <div class="device-info-container" style="margin-top: 5px;">
+        <small class="text-muted">
+          🖥️ Device: <span id="currentDevice">Loading...</span> | 
+          🌐 IP: <span id="currentIP">Loading...</span>
+        </small>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    if (typeof particlesJS !== 'undefined') {
+      particlesJS('particles-js', {
+        particles: {
+          number: { value: 120, density: { enable: true, value_area: 800 } },
+          color: { value: '#ff0000' },
+          shape: { type: 'circle' },
+          opacity: { value: 0.6, random: false },
+          size: { value: 4, random: true },
+          line_linked: {
+            enable: true,
+            distance: 180,
+            color: '#ff0000',
+            opacity: 0.5,
+            width: 2
+          },
+          move: {
+            enable: true,
+            speed: 3,
+            direction: 'none',
+            random: false,
+            straight: false,
+            out_mode: 'out'
+          }
+        },
+        interactivity: {
+          detect_on: 'canvas',
+          events: {
+            onhover: { enable: true, mode: 'repulse' },
+            onclick: { enable: true, mode: 'push' }
+          },
+          modes: {
+            repulse: { distance: 100, duration: 0.4 },
+            push: { particles_nb: 4 }
+          }
+        }
+      });
+    }
+
+    function showAdminEntryAnimation() {
+      const entryEffect = document.createElement('div');
+      entryEffect.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, rgba(0,0,0,0.9), rgba(26,26,26,0.9));
+        z-index: 10000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        animation: fadeInOut 3s ease-in-out forwards;
+      `;
+
+      entryEffect.innerHTML = `
+        <div style="text-align: center;">
+          <div style="font-size: 6rem; animation: carSiren 2s ease-in-out;">🚔</div>
+          <div style="color: #ff0000; font-size: 1.5rem; margin-top: 20px; animation: textGlow 2s ease-in-out;">
+            🛡️ SAFE TRACER ACCESS GRANTED
+          </div>
+          <div style="color: #ffffff; font-size: 1rem; margin-top: 10px;">
+            AI Investigation System by NIDHIN R
+          </div>
+        </div>
+      `;
+
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes fadeInOut {
+          0% { opacity: 0; }
+          30% { opacity: 1; }
+          70% { opacity: 1; }
+          100% { opacity: 0; pointer-events: none; }
+        }
+        @keyframes carSiren {
+          0%, 100% { transform: scale(1) rotate(0deg); }
+          25% { transform: scale(1.1) rotate(-5deg); }
+          50% { transform: scale(1.2) rotate(0deg); }
+          75% { transform: scale(1.1) rotate(5deg); }
+        }
+        @keyframes textGlow {
+          0%, 100% { text-shadow: 0 0 10px #ff0000; }
+          50% { text-shadow: 0 0 30px #ff0000, 0 0 50px #ff0000; }
+        }
+      `;
+
+      document.head.appendChild(style);
+      document.body.appendChild(entryEffect);
+
+      setTimeout(() => {
+        if (document.body.contains(entryEffect)) {
+          document.body.removeChild(entryEffect);
+        }
+        if (document.head.contains(style)) {
+          document.head.removeChild(style);
+        }
+      }, 3500);
+    }
+
+    window.showAdminEntryAnimation = showAdminEntryAnimation;
+  </script>
+  <script src="admin.js"></script>
+</body>
+</html>
